@@ -84,11 +84,8 @@ def disappearing_with_drop(docs, drop_ratio=0.7):
     return disappearing
 
 def emerging_with_growth(docs, growth_ratio=1.3):
-    topics_1 = docs[0].get("topics") if docs[0].get("year") < docs[1].get("year") else docs[1].get("topics")
-    topics_2 = docs[0].get("topics") if docs[0].get("year") > docs[1].get("year") else docs[1].get("topics")
-
-    counts1 = Counter(topics_1)
-    counts2 = Counter(topics_2)
+    counts1 = get_topics_enriched(ticker, year1)
+    counts2 = get_topics_enriched(ticker, year2)
 
     emerging = []
 
