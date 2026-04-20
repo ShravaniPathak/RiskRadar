@@ -59,3 +59,26 @@ def disappearing_with_drop(docs, drop_ratio=0.7):
             disappearing.append((topic, freq1, freq2))
 
     return disappearing
+
+def emerging_with_growth(docs, growth_ratio=1.3):
+    topics_1 = docs[0].get("topics") if docs[0].get("year") < docs[1].get("year") else docs[1].get("topics")
+    topics_2 = docs[0].get("topics") if docs[0].get("year") > docs[1].get("year") else docs[1].get("topics")
+
+    counts1 = Counter(topics_1)
+    counts2 = Counter(topics_2)
+
+    emerging = []
+
+    for topic in counts2:
+        freq2 = counts2[topic]
+        freq1 = counts1.get(topic, 0)
+
+        if freq1 == 0:
+            emerging.append((topic, freq1, freq2, "new"))
+
+        elif freq2 > freq1 * growth_ratio:
+            emerging.append((topic, freq1, freq2, "growth"))
+
+    return emerging
+
+
