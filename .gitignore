@@ -79,7 +79,6 @@ venv.bak/
 *.log
 docker-compose.override.yml
 .dockerignore
-**/Dockerfile*
 
 # Redis dump files
 dump.rdb
