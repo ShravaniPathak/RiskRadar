@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 from app.core.config import logger
 from bertopic import BERTopic
+import ast
 
 def download_file_from_google_drive(id, destination):
     URL = "https://docs.google.com/uc?export=download&confirm=t"
@@ -85,4 +86,29 @@ def get_topic_data():
 
     except Exception as e:
         logger.error(f"Error loading CSV data: {str(e)}")
+        return None
+
+_enriched_data = None
+ENRICHED_DATA = "models/bertopic_model/enriched_chunks.json"
+
+def get_enriched_data():
+    global _enriched_data
+    
+    if _enriched_data is not None:
+        return _enriched_data
+
+    try:
+        with open(ENRICHED_DATA, 'r', encoding='utf-8') as f:
+            raw_str = f.read().strip()
+            
+            _enriched_data = ast.literal_eval(raw_str)
+
+        logger.info(f"Data successfully parsed as Python literal from {ENRICHED_DATA}")
+        return _enriched_data
+
+    except (SyntaxError, ValueError) as e:
+        logger.error(f"File content is not a valid Python literal: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
         return None
