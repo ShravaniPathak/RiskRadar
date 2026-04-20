@@ -36,6 +36,16 @@ def get_other_company_counts(ticker, year):
     ]
     return Counter(topics)
 
+def get_topics_enriched(ticker, year):
+    enriched_data = get_enriched_data()
+    return set([
+        item["topic"]
+        for item in enriched_data
+        if item["ticker"] == ticker
+        and item["year"] == year
+        and item["topic"] != -1
+    ])
+
 def disappearing_risks(docs, threshold=0.8):
     topics_1 = set(docs[0].get("topics") if docs[0].get("year") < docs[1].get("year") else docs[1].get("topics"))
     topics_2 = set(docs[0].get("topics") if docs[0].get("year") > docs[1].get("year") else docs[1].get("topics"))
@@ -94,4 +104,35 @@ def emerging_with_growth(docs, growth_ratio=1.3):
 
     return emerging
 
+def missing_with_drop_vs_others(ticker, year, drop_ratio=0.3):
+    target_counts = get_topics_enriched(ticker, year)
+    other_counts = get_other_company_counts(ticker, year)
 
+    missing = []
+
+    for topic in other_counts:
+        freq_other = other_counts[topic]
+        freq_target = target_counts.get(topic, 0)
+
+        if freq_target < freq_other * drop_ratio:
+            missing.append((topic, freq_other, freq_target))
+
+    return missing
+
+def emerging_vs_others_growth(ticker, year, growth_ratio=1.5):
+    target_counts = get_topics_enriched(ticker, year)
+    other_counts = get_other_company_counts(ticker, year)
+
+    emerging = []
+
+    for topic in target_counts:
+        freq_target = target_counts[topic]
+        freq_other = other_counts.get(topic, 0)
+
+        if freq_other == 0:
+            emerging.append((topic, freq_other, freq_target, "unique"))
+
+        elif freq_target > freq_other * growth_ratio:
+            emerging.append((topic, freq_other, freq_target, "dominant"))
+
+    return emerging
