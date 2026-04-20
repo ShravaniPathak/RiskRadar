@@ -83,7 +83,7 @@ def disappearing_with_drop(docs, drop_ratio=0.7):
 
     return disappearing
 
-def emerging_with_growth(docs, growth_ratio=1.3):
+def emerging_with_growth(ticker, year1, year2, growth_ratio=1.3):
     counts1 = get_topics_enriched(ticker, year1)
     counts2 = get_topics_enriched(ticker, year2)
 
