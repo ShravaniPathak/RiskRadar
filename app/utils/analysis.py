@@ -23,6 +23,16 @@ def get_topics(ticker, year, docs):
         and item["topics"] != -1
     ])
 
+def get_other_company_counts(ticker, year):
+    topics = [
+        item["topic"]
+        for item in enriched_data
+        if item["ticker"] != ticker
+        and item["year"] == year
+        and item["topic"] != -1
+    ]
+    return Counter(topics)
+
 def disappearing_risks(docs, threshold=0.8):
     topics_1 = set(docs[0].get("topics") if docs[0].get("year") < docs[1].get("year") else docs[1].get("topics"))
     topics_2 = set(docs[0].get("topics") if docs[0].get("year") > docs[1].get("year") else docs[1].get("topics"))
