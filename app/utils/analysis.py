@@ -1,3 +1,4 @@
+from os import EX_DATAERR
 from app.utils.load_model import get_bert_model, get_enriched_data
 from sklearn.metrics.pairwise import cosine_similarity
 from collections import Counter
@@ -38,7 +39,11 @@ def get_other_company_counts(ticker, year):
 
 def get_topics_enriched(ticker, year):
     enriched_data = get_enriched_data()
-    return set([
+    if enriched_data is None:
+        raise Exception("Can't load enriched_data")
+    
+    # Use Counter to get frequencies instead of a set
+    return Counter([
         item["topic"]
         for item in enriched_data
         if item["ticker"] == ticker

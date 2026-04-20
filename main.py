@@ -42,7 +42,10 @@
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from app.workflows.disappearing_risks import dr_analysis, dr_analysiss
+from app.workflows.disappearing_risks import dr_analysis
+from app.workflows.emerging_analysis import er_analysis
+from app.workflows.missing_with_drop_vs_others import missing_with_drop_vs_others_anlaysis
+from app.workflows.emerging_vs_others_growth import emerging_vs_others_growth_analysis
 
 app = FastAPI(title="SEC Analysis API")
 
@@ -60,12 +63,31 @@ async def trigger_analysis(request: AnalysisRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/analyzee")
-async def trigger_analysis(request: AnalysisRequest):
+class AnalysisRequestEmerging(BaseModel):
+    ticker: str
+    year1: int
+    year2: int
+
+@app.post("/analyze/emerging")
+async def trigger_analysis_emerging(request: AnalysisRequestEmerging):
     try:
-        # Note: dr_analysis calls .get(), so this blocks the worker 
-        # but allows the FastAPI event loop to remain responsive.
-        result = dr_analysiss(request.ticker, request.year)
+        result = er_analysis(request.ticker, request.year1, request.year2)
+        return {"status": "success", "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/analyze/missing_with_drop_vs_others")
+async def trigger_analysis_missing_with_drop_vs_others(request: AnalysisRequest):
+    try:
+        result = missing_with_drop_vs_others_anlaysis(request.ticker, request.year)
+        return {"status": "success", "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/analyze/emerging_vs_others_growth")
+async def trigger_analysis_emerging_vs_others_growth_anaysis(request: AnalysisRequest):
+    try:
+        result = emerging_vs_others_growth_analysis(request.ticker, request.year)
         return {"status": "success", "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
