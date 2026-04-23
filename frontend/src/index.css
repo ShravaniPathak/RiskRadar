@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+body {
+  margin: 0;
+  background-color: #020617;
+  color: white;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fix for the black text issue: ensure all text defaults to white/slate */
+h1, h2, h3, p, span, label {
+  color: inherit;
+}
+
+input::placeholder {
+  color: #334155;
+}

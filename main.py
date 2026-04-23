@@ -40,14 +40,31 @@
 
 
 
-from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.workflows.disappearing_risks import dr_analysis
 from app.workflows.emerging_analysis import er_analysis
 from app.workflows.missing_with_drop_vs_others import missing_with_drop_vs_others_anlaysis
 from app.workflows.emerging_vs_others_growth import emerging_vs_others_growth_analysis
 
 app = FastAPI(title="SEC Analysis API")
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "*", 
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class AnalysisRequest(BaseModel):
     ticker: str
