@@ -96,3 +96,5 @@ Thumbs.db
 ehthumbs.db
 
 node_modules/
+
+outputs/

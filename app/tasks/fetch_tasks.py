@@ -1,4 +1,6 @@
 import time
+import os
+from pathlib import Path
 from typing import Dict, Any
 
 from edgar import Company, set_identity
@@ -8,8 +10,8 @@ from celery.exceptions import Ignore
 
 from app.core.celery_app import celery_app
 from app.services.edgar_service import EdgarService
-
 from app.core.config import logger
+from app.utils.load_model import get_enriched_data
 
 
 def skip(job_id: str, year: int, ticker: str, reason: str = "filing_not_found"):
@@ -34,6 +36,19 @@ def fetch_filing(
         form: str,
         section_name: str):
 
+    file_path = Path(f"outputs/{ticker}/{year}")
+    if file_path.exists():
+        with open(file_path, "r") as file:
+            logger.info(f"Reading cached file {file_path}")
+            raw_section = file.read()
+            return {
+                "job_id": job_id,
+                "year": year,
+                "ticker": ticker,
+                "status": "success",
+                "filing": raw_section
+            }
+
     service = EdgarService()
     set_identity("your.name@example.com")
 
@@ -52,6 +67,11 @@ def fetch_filing(
         return skip(job_id, year, ticker)
 
     raw_section = parsed_filing.get_sec_section(section_name)
+
+    dir_path = f"outputs/{ticker}"
+    os.makedirs(dir_path, exist_ok=True)
+    with open(f"outputs/{ticker}/{year}", "w") as file:
+        file.write(raw_section)
 
     return {
         "job_id": job_id,
