@@ -3,6 +3,8 @@ import requests
 from app.core.config import logger
 from bertopic import BERTopic
 import ast
+import json
+import os
 
 def download_file_from_google_drive(id, destination):
     URL = "https://docs.google.com/uc?export=download&confirm=t"
@@ -91,6 +93,14 @@ def get_topic_data():
 _enriched_data = None
 ENRICHED_DATA = "models/bertopic_model/enriched_chunks.json"
 
+def persist_enriched_data(ed):
+    global _enriched_data
+    _enriched_data = ed
+    with open(ENRICHED_DATA, "w") as file:
+        json.dump(_enriched_data, file)
+        file.flush()
+        os.fsync(file.fileno())
+
 def get_enriched_data():
     global _enriched_data
     
@@ -100,7 +110,7 @@ def get_enriched_data():
     try:
         with open(ENRICHED_DATA, 'r', encoding='utf-8') as f:
             raw_str = f.read().strip()
-            
+
             _enriched_data = ast.literal_eval(raw_str)
 
         logger.info(f"Data successfully parsed as Python literal from {ENRICHED_DATA}")

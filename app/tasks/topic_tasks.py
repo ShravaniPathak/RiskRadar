@@ -1,6 +1,6 @@
 from app.core.config import logger
 from app.core.celery_app import celery_app
-from app.utils.load_model import get_bert_model, get_topic_data
+from app.utils.load_model import get_bert_model, get_enriched_data, persist_enriched_data, get_topic_data
 from app.utils.analysis import disappearing_risks, disappearing_with_drop
 
 def get_topic_objects(topic_ids):
@@ -30,6 +30,8 @@ def topic_modelling(outputs, target_year):
     if topic_model is None:
         raise Exception("Cannot load bertopic model")
 
+    enriched_data = get_enriched_data()
+
     for ctx in outputs:
         if ctx.get("status") != "success":
             continue
@@ -41,6 +43,17 @@ def topic_modelling(outputs, target_year):
 
         # Perform Inference
         topics, probs = topic_model.transform(chunks, embeddings=embeddings)
+
+        if enriched_data:
+            if len(list(filter(lambda entry: entry.get("ticker") == ctx.get("ticker"), enriched_data))) == 0:
+                for i in range(len(topics)):
+                    enriched_data.append({
+                        "chunk": chunks[i],
+                        "topic": int(topics[i]),
+                        "year": ctx.get("year"),
+                        "ticker": ctx.get("ticker")
+                        })
+                persist_enriched_data(enriched_data)
 
         # Attach results
         ctx["topics"] = topics.tolist() # pyright: ignore
