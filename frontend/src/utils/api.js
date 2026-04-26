@@ -57,6 +57,7 @@ export const api = {
     runAll: async (ticker, year) => {
         const results = await Promise.allSettled([
             api.analyzeDisappearing(ticker, year),
+            api.analyzeEmerging(ticker, year - 1, year),
             api.analyzeMissingWithDrop(ticker, year),
             api.analyzeGrowth(ticker, year) 
             // Note: analyzeEmerging needs year1/year2, 
@@ -65,8 +66,9 @@ export const api = {
 
         return {
             disappearing: results[0].status === 'fulfilled' ? results[0].value : null,
-            missing: results[1].status === 'fulfilled' ? results[1].value : null,
-            growth: results[2].status === 'fulfilled' ? results[2].value : null,
+            emerging: results[1].status === 'fulfilled' ? results[1].value : null,
+            missing: results[2].status === 'fulfilled' ? results[2].value : null,
+            growth: results[3].status === 'fulfilled' ? results[3].value : null,
         };
     },
         
