@@ -1,7 +1,8 @@
 from os import EX_DATAERR
 from app.utils.load_model import get_bert_model, get_enriched_data
 from sklearn.metrics.pairwise import cosine_similarity
-from collections import Counter
+from collections import Counter, defaultdict
+import statistics
 
 
 def max_similarity(topic_id, other_topic_ids, topic_embeddings):
@@ -28,21 +29,43 @@ def get_other_company_counts(ticker, year):
     enriched_data = get_enriched_data()
     if enriched_data is None:
         raise Exception("Can't load enriched_data")
-    topics = [
-        item["topic"]
+
+    company_topic_counts = Counter(
+        (item["ticker"], item["topic"])
         for item in enriched_data
-        if item["ticker"] != ticker
-        and item["year"] == year
+        if item["ticker"] != ticker 
+        and item["year"] == year 
         and item["topic"] != -1
-    ]
-    return Counter(topics)
+    )
+
+    topic_distribution = defaultdict(list)
+    for (t_ticker, topic), count in company_topic_counts.items():
+        topic_distribution[topic].append(count)
+
+    mode_counts = {}
+    for topic, counts_list in topic_distribution.items():
+        mode_counts[topic] = statistics.mode(counts_list)
+
+    return mode_counts
+
+# def get_other_company_counts(ticker, year):
+#     enriched_data = get_enriched_data()
+#     if enriched_data is None:
+#         raise Exception("Can't load enriched_data")
+#     topics = [
+#         item["topic"]
+#         for item in enriched_data
+#         if item["ticker"] != ticker
+#         and item["year"] == year
+#         and item["topic"] != -1
+#     ]
+#     return Counter(topics)
 
 def get_topics_enriched(ticker, year):
     enriched_data = get_enriched_data()
     if enriched_data is None:
         raise Exception("Can't load enriched_data")
-    
-    # Use Counter to get frequencies instead of a set
+
     return Counter([
         item["topic"]
         for item in enriched_data
