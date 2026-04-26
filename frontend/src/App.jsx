@@ -100,13 +100,11 @@ function App() {
   const [viewMode, setViewMode] = useState('disappearing');
   const [sortOrder, setSortOrder] = useState('desc');
 
-  // Helper to fetch the correct name from the results[0] mapping
   const getTopicName = useCallback((id) => {
     const nameMap = result?.disappearing?.data?.topic_id_to_name || {};
     return nameMap[id] || `Vector ${id}`;
   }, [result]);
 
-  // Processes disappearing topics and uses the name mapping
   const disappearingTopics = useMemo(() => {
     if (!result?.disappearing?.data?.analysis) return [];
     const topicMap = {};
@@ -216,6 +214,9 @@ function App() {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
     setActiveTopicIndex(0); 
   };
+
+  const activeTopic = sortedDataSet[activeTopicIndex];
+  const hasChunks = activeTopic?.chunks && activeTopic.chunks.length > 0;
 
   return (
     <div className="relative min-h-screen w-full bg-[#020617] text-slate-200 flex flex-col items-center overflow-x-hidden selection:bg-cyan-500/30">
@@ -332,7 +333,7 @@ function App() {
                       transition={{ duration: 0.4 }}
                       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                     >
-                      {sortedDataSet[activeTopicIndex]?.history.map((snapshot, sIdx) => (
+                      {activeTopic?.history.map((snapshot, sIdx) => (
                         <SnapshotCard key={`${snapshot.year}-${sIdx}`} snapshot={snapshot} delay={sIdx} theme="rose" />
                       ))}
                     </motion.div>
@@ -345,64 +346,63 @@ function App() {
                       transition={{ duration: 0.4 }}
                       className="w-full"
                     >
-                      {sortedDataSet[activeTopicIndex] ? (
-                        <div className="bg-slate-900/30 border border-slate-800/40 rounded-[2.5rem] p-10 flex flex-col md:flex-row gap-12 backdrop-blur-xl">
-                          <div className="md:w-1/3 space-y-8">
-                             <div className="px-2">
-                               <h3 className={`text-2xl max-w-full break-words font-black mb-1 leading-tight ${THEME_MAP[viewMetadata[viewMode].theme].accent}`}>
-                                 {sortedDataSet[activeTopicIndex].name}
+                      {activeTopic ? (
+                        <div className={`bg-slate-900/30 border border-slate-800/40 rounded-[2.5rem] p-10 flex flex-col md:flex-row gap-12 backdrop-blur-xl ${!hasChunks ? 'items-center justify-center' : ''}`}>
+                          <div className={`${hasChunks ? 'md:w-1/3 space-y-8' : 'w-full max-w-xl space-y-10 text-center'} flex flex-col justify-center`}>
+                             <div>
+                               <h3 className={`text-2xl w-ful break-words font-black mb-1 leading-tight ${THEME_MAP[viewMetadata[viewMode].theme].accent}`}>
+                                 {activeTopic.name}
                                </h3>
                                <p className="text-[10px] text-slate-500 font-mono uppercase tracking-[0.2em]">Primary Factor Mapping</p>
                              </div>
 
-                             <div className={`p-8 rounded-3xl border ${THEME_MAP[viewMetadata[viewMode].theme].bg} border-white/5`}>
-                               <div className={`flex items-center gap-3 mb-8 ${THEME_MAP[viewMetadata[viewMode].theme].accent}`}>
+                             <div className={`p-8 rounded-3xl border ${THEME_MAP[viewMetadata[viewMode].theme].bg} border-white/5 w-full mx-auto`}>
+                               <div className={`flex items-center gap-3 mb-8 ${THEME_MAP[viewMetadata[viewMode].theme].accent} ${!hasChunks ? 'justify-center' : ''}`}>
                                  <TrendingUp size={18}/>
                                  <span className="font-mono text-[10px] uppercase font-black tracking-widest">Logic Delta</span>
                                </div>
                                <div className="flex items-center justify-between gap-x-2 bg-black/20 p-6 rounded-2xl border border-slate-800/40">
-                                 <div className="text-center">
-                                   <span className="block text-[10px] text-slate-500 font-mono mb-1 leading-none">{sortedDataSet[activeTopicIndex].year1}</span>
-                                   <span className="text-2xl font-mono text-slate-500">{sortedDataSet[activeTopicIndex].freq1}</span>
+                                 <div className="text-center flex-1">
+                                   <span className="block text-[10px] text-slate-500 font-mono mb-1 leading-none">{activeTopic.year1}</span>
+                                   <span className="text-2xl font-mono text-slate-500">{activeTopic.freq1}</span>
                                  </div>
-                                 <div className="flex flex-col items-center gap-1">
+                                 <div className="flex flex-col items-center gap-1 px-4">
                                    <ArrowRight className={THEME_MAP[viewMetadata[viewMode].theme].accent} size={16} />
                                    <span className={`text-[8px] font-bold uppercase opacity-50`}>Rel</span>
                                  </div>
-                                 <div className="text-center">
-                                   <span className={`block text-[10px] font-mono mb-1 leading-none ${THEME_MAP[viewMetadata[viewMode].theme].accent}`}>{sortedDataSet[activeTopicIndex].year2}</span>
-                                   <span className={`text-2xl font-mono font-bold ${THEME_MAP[viewMetadata[viewMode].theme].accent}`}>{sortedDataSet[activeTopicIndex].freq2}</span>
+                                 <div className="text-center flex-1">
+                                   <span className={`block text-[10px] font-mono mb-1 leading-none ${THEME_MAP[viewMetadata[viewMode].theme].accent}`}>{activeTopic.year2}</span>
+                                   <span className={`text-2xl font-mono font-bold ${THEME_MAP[viewMetadata[viewMode].theme].accent}`}>{activeTopic.freq2}</span>
                                  </div>
                                </div>
                                <p className="text-slate-400 text-[11px] mt-8 leading-relaxed italic opacity-80 font-mono uppercase tracking-tight">
                                  {viewMode === 'missing' || viewMode === 'growth'
-                                   ? `Industrial benchmarking reveals a modal frequency of ${sortedDataSet[activeTopicIndex].freq1} Mentions versus ${ticker}'s ${sortedDataSet[activeTopicIndex].freq2} observed instances.`
-                                   : `Temporal analysis indicates a shift from ${sortedDataSet[activeTopicIndex].freq1} mentions in ${sortedDataSet[activeTopicIndex].year1} to ${sortedDataSet[activeTopicIndex].freq2} in ${sortedDataSet[activeTopicIndex].year2}.`}
+                                   ? `Industrial benchmarking reveals a modal frequency of ${activeTopic.freq1} Mentions versus ${ticker}'s ${activeTopic.freq2} observed instances.`
+                                   : `Temporal analysis indicates a shift from ${activeTopic.freq1} mentions in ${activeTopic.year1} to ${activeTopic.freq2} in ${activeTopic.year2}.`}
                                </p>
                              </div>
                           </div>
-                          <div className="flex-grow flex flex-col max-h-[500px]">
-                             <div className="overflow-y-auto pr-6 custom-scrollbar flex-grow">
-                               <div className="space-y-4 pb-8">
-                                {sortedDataSet[activeTopicIndex].chunks.length > 0 ? sortedDataSet[activeTopicIndex].chunks.map((chunk, cIdx) => (
-                                  <motion.div 
-                                    initial={{ opacity: 0, x: 10 }} 
-                                    animate={{ opacity: 1, x: 0 }} 
-                                    transition={{ delay: cIdx * 0.05 }}
-                                    key={cIdx} 
-                                    className="relative pl-8 py-3 group/item"
-                                  >
-                                    <div className={`absolute left-0 top-0 bottom-0 w-[1px] transition-all duration-300 ${THEME_MAP[viewMetadata[viewMode].theme].barBase} ${THEME_MAP[viewMetadata[viewMode].theme].barHover}`} />
-                                    <p className="text-slate-300 text-sm leading-relaxed font-light group-hover/item:text-white transition-colors">"{chunk}"</p>
-                                  </motion.div>
-                                )) : (
-                                  <div className="h-40 flex flex-col items-center justify-center border border-dashed border-slate-800/40 rounded-3xl text-slate-700 font-mono text-[10px] uppercase tracking-widest gap-4">
-                                    <Activity className="opacity-20" size={24} /> Semantic context absent in target filing
-                                  </div>
-                                )}
+                          
+                          {hasChunks && (
+                            <div className="flex-grow flex flex-col max-h-[500px]">
+                               <div className="overflow-y-auto pr-6 custom-scrollbar flex-grow">
+                                 <div className="space-y-4 pb-8">
+                                   {activeTopic.chunks.map((chunk, cIdx) => (
+                                    <motion.div 
+                                      initial={{ opacity: 0, x: 10 }} 
+                                      animate={{ opacity: 1, x: 0 }} 
+                                      transition={{ delay: cIdx * 0.05 }}
+                                      key={cIdx} 
+                                      className="relative pl-8 py-3 group/item"
+                                    >
+                                      <div className={`absolute left-0 top-0 bottom-0 w-[1px] transition-all duration-300 ${THEME_MAP[viewMetadata[viewMode].theme].barBase} ${THEME_MAP[viewMetadata[viewMode].theme].barHover}`} />
+                                      <p className="text-slate-300 text-sm leading-relaxed font-light group-hover/item:text-white transition-colors">"{chunk}"</p>
+                                    </motion.div>
+                                  ))}
+                                 </div>
                                </div>
-                             </div>
-                          </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="text-center py-20 text-slate-700 font-mono text-[10px] uppercase tracking-[0.4em] italic">No Vector Selected</div>
