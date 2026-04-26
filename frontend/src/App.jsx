@@ -150,14 +150,14 @@ function App() {
     if (!result?.missing?.data || !result?.disappearing?.data?.target_year) return [];
     const targetData = result.disappearing.data.target_year;
     const rawData = Array.isArray(result.missing.data) ? result.missing.data : [];
-    return rawData.filter(item => Array.isArray(item)).map(([topicId, fMarket, fCompany]) => {
+    return rawData.filter(item => Array.isArray(item)).map(([topicId, fIndustry, fCompany]) => {
       const relevantChunks = targetData.chunks?.filter((_, idx) => targetData.topics[idx] === topicId) || [];
       return { 
-        id: topicId, freq1: fMarket, freq2: fCompany, 
+        id: topicId, freq1: fIndustry, freq2: fCompany, 
         name: getTopicName(topicId), 
         chunks: relevantChunks, 
-        year1: "Market", year2: ticker,
-        delta: Math.abs(fCompany - fMarket)
+        year1: "Industry", year2: ticker,
+        delta: Math.abs(fCompany - fIndustry)
       };
     });
   }, [result, ticker, getTopicName]);
@@ -165,14 +165,14 @@ function App() {
   const growthTopics = useMemo(() => {
     if (!result?.growth?.data || !result?.disappearing?.data?.target_year) return [];
     const targetData = result.disappearing.data.target_year;
-    return result.growth.data.map(([topicId, fMarket, fCompany]) => {
+    return result.growth.data.map(([topicId, fIndustry, fCompany]) => {
       const relevantChunks = targetData.chunks?.filter((_, idx) => targetData.topics[idx] === topicId) || [];
       return { 
-        id: topicId, freq1: fMarket, freq2: fCompany, 
+        id: topicId, freq1: fIndustry, freq2: fCompany, 
         name: getTopicName(topicId), 
         chunks: relevantChunks, 
-        year1: "Market", year2: ticker,
-        delta: Math.abs(fCompany - fMarket)
+        year1: "Industry", year2: ticker,
+        delta: Math.abs(fCompany - fIndustry)
       };
     });
   }, [result, ticker, getTopicName]);
@@ -349,7 +349,7 @@ function App() {
                         <div className="bg-slate-900/30 border border-slate-800/40 rounded-[2.5rem] p-10 flex flex-col md:flex-row gap-12 backdrop-blur-xl">
                           <div className="md:w-1/3 space-y-8">
                              <div className="px-2">
-                               <h3 className={`text-2xl font-black mb-1 leading-tight ${THEME_MAP[viewMetadata[viewMode].theme].accent}`}>
+                               <h3 className={`text-2xl max-w-full break-words font-black mb-1 leading-tight ${THEME_MAP[viewMetadata[viewMode].theme].accent}`}>
                                  {sortedDataSet[activeTopicIndex].name}
                                </h3>
                                <p className="text-[10px] text-slate-500 font-mono uppercase tracking-[0.2em]">Primary Factor Mapping</p>
