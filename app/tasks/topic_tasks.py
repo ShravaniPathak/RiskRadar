@@ -45,8 +45,9 @@ def topic_modelling(outputs, target_year):
         topics, probs = topic_model.transform(chunks, embeddings=embeddings)
 
         if enriched_data:
-            if len(list(filter(lambda entry: entry.get("ticker") == ctx.get("ticker"), enriched_data))) == 0:
+            if len(list(filter(lambda entry: entry.get("ticker") == ctx.get("ticker") and entry.get("year") == ctx.get("year"), enriched_data))) == 0:
                 for i in range(len(topics)):
+                    print(f"Appending {ctx.get('ticker')} {ctx.get('year')}")
                     enriched_data.append({
                         "chunk": chunks[i],
                         "topic": int(topics[i]),

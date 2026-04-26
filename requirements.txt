@@ -11,3 +11,4 @@ python-dotenv
 edgartools
 bertopic
 hdbscan
+debugpy
