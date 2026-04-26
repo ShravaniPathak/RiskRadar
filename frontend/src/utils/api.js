@@ -64,6 +64,8 @@ export const api = {
             // so we omit it from this specific batch or pass defaults
         ]);
 
+        console.log(results[0].value)
+
         return {
             disappearing: results[0].status === 'fulfilled' ? results[0].value : null,
             emerging: results[1].status === 'fulfilled' ? results[1].value : null,

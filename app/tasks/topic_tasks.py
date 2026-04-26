@@ -78,10 +78,13 @@ def topic_modelling(outputs, target_year):
 
     logger.info("Analysis over")
 
+    topic_map = dict(zip(topic_data['Topic'], topic_data['Name']))
+
     final_output = {
             "ticker": ticker,
             "analysis": list(zip(rel_years, drs)),
             "target_year": target_year,
+            "topic_id_to_name": topic_map
             }
 
     return final_output

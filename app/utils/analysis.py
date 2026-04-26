@@ -129,9 +129,11 @@ def emerging_with_growth(ticker, year1, year2, growth_ratio=1.3):
 
     return emerging
 
-def missing_with_drop_vs_others(ticker, year, drop_ratio=0.3):
+def missing_with_drop_vs_others(ticker, year, drop_ratio=0.7):
     target_counts = get_topics_enriched(ticker, year)
     other_counts = get_other_company_counts(ticker, year)
+    print(f"target_counts: {target_counts}")
+    print(f"other_counts: {other_counts}")
 
     missing = []
 

@@ -73,8 +73,6 @@ class AnalysisRequest(BaseModel):
 @app.post("/analyze")
 async def trigger_analysis(request: AnalysisRequest):
     try:
-        # Note: dr_analysis calls .get(), so this blocks the worker 
-        # but allows the FastAPI event loop to remain responsive.
         result = dr_analysis(request.ticker, request.year)
         return {"status": "success", "data": result}
     except Exception as e:
