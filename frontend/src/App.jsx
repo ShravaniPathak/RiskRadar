@@ -92,7 +92,7 @@ const SnapshotCard = ({ snapshot, delay, theme = 'rose' }) => {
 
 function App() {
   const [ticker, setTicker] = useState('');
-  const [year, setYear] = useState('2023');
+  const [year, setYear] = useState('2025');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);

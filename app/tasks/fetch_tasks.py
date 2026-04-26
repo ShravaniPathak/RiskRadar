@@ -63,10 +63,17 @@ def fetch_filing(
     if parsed_filing is None:
         return skip(job_id, year, ticker, "failed_to_parse")
 
-    if section_name not in parsed_filing.sections:
-        return skip(job_id, year, ticker)
+    # print(parsed_filing.sections)
+    # if section_name not in parsed_filing.sections:
+    #     return skip(job_id, year, ticker, f"section_not_found, available sections: {parsed_filing.sections}")
 
     raw_section = parsed_filing.get_sec_section(section_name)
+    if raw_section:
+        if raw_section.strip() == "":
+            return skip(job_id, year, ticker, f"failed to parse section")
+    else:
+        return skip(job_id, year, ticker, f"failed to parse section")
+
 
     dir_path = f"outputs/{ticker}"
     os.makedirs(dir_path, exist_ok=True)

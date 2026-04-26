@@ -104,8 +104,8 @@ def persist_enriched_data(ed):
 def get_enriched_data():
     global _enriched_data
     
-    if _enriched_data is not None:
-        return _enriched_data
+    # if _enriched_data is not None:
+    #     return _enriched_data
 
     try:
         with open(ENRICHED_DATA, 'r', encoding='utf-8') as f:

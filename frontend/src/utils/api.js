@@ -55,22 +55,16 @@ export const api = {
         }),
 
     runAll: async (ticker, year) => {
-        const results = await Promise.allSettled([
-            api.analyzeDisappearing(ticker, year),
-            api.analyzeEmerging(ticker, year - 1, year),
-            api.analyzeMissingWithDrop(ticker, year),
-            api.analyzeGrowth(ticker, year) 
-            // Note: analyzeEmerging needs year1/year2, 
-            // so we omit it from this specific batch or pass defaults
-        ]);
-
-        console.log(results[0].value)
+        const disappearing = await api.analyzeDisappearing(ticker, year);
+        const emerging     = await api.analyzeEmerging(ticker, year - 1, year);
+        const missing      = await api.analyzeMissingWithDrop(ticker, year);
+        const growth       = await api.analyzeGrowth(ticker, year);
 
         return {
-            disappearing: results[0].status === 'fulfilled' ? results[0].value : null,
-            emerging: results[1].status === 'fulfilled' ? results[1].value : null,
-            missing: results[2].status === 'fulfilled' ? results[2].value : null,
-            growth: results[3].status === 'fulfilled' ? results[3].value : null,
+            disappearing: disappearing,
+            emerging: emerging,
+            missing: missing,
+            growth: growth,
         };
     },
         

@@ -75,41 +75,47 @@ def get_topics_enriched(ticker, year):
     ])
 
 def disappearing_risks(docs, threshold=0.8):
-    topics_1 = set(docs[0].get("topics") if docs[0].get("year") < docs[1].get("year") else docs[1].get("topics"))
-    topics_2 = set(docs[0].get("topics") if docs[0].get("year") > docs[1].get("year") else docs[1].get("topics"))
+    try:
+        topics_1 = set(docs[0].get("topics") if docs[0].get("year") < docs[1].get("year") else docs[1].get("topics"))
+        topics_2 = set(docs[0].get("topics") if docs[0].get("year") > docs[1].get("year") else docs[1].get("topics"))
 
-    topic_model = get_bert_model()
-    if topic_model is None:
-        raise Exception("Cannot load bertopic")
-    topic_embeddings = topic_model.topic_embeddings_
+        topic_model = get_bert_model()
+        if topic_model is None:
+            raise Exception("Cannot load bertopic")
+        topic_embeddings = topic_model.topic_embeddings_
 
-    disappearing = []
+        disappearing = []
 
-    for t1 in topics_1:
-        sim = max_similarity(t1, list(topics_2), topic_embeddings)
+        for t1 in topics_1:
+            sim = max_similarity(t1, list(topics_2), topic_embeddings)
 
-        if sim < threshold:
-            disappearing.append(t1)
+            if sim < threshold:
+                disappearing.append(t1)
 
-    return disappearing
+        return disappearing
+    except:
+        return []
 
 def disappearing_with_drop(docs, drop_ratio=0.7):
-    topics_1 = docs[0].get("topics") if docs[0].get("year") < docs[1].get("year") else docs[1].get("topics")
-    topics_2 = docs[0].get("topics") if docs[0].get("year") > docs[1].get("year") else docs[1].get("topics")
+    try:
+        topics_1 = docs[0].get("topics") if docs[0].get("year") < docs[1].get("year") else docs[1].get("topics")
+        topics_2 = docs[0].get("topics") if docs[0].get("year") > docs[1].get("year") else docs[1].get("topics")
 
-    counts1 = Counter(topics_1)
-    counts2 = Counter(topics_2)
+        counts1 = Counter(topics_1)
+        counts2 = Counter(topics_2)
 
-    disappearing = []
+        disappearing = []
 
-    for topic in counts1:
-        freq1 = counts1[topic]
-        freq2 = counts2.get(topic, 0)
+        for topic in counts1:
+            freq1 = counts1[topic]
+            freq2 = counts2.get(topic, 0)
 
-        if freq2 < freq1 * drop_ratio:
-            disappearing.append((topic, freq1, freq2))
+            if freq2 < freq1 * drop_ratio:
+                disappearing.append((topic, freq1, freq2))
 
-    return disappearing
+        return disappearing
+    except:
+        return []
 
 def emerging_with_growth(ticker, year1, year2, growth_ratio=1.3):
     counts1 = get_topics_enriched(ticker, year1)
